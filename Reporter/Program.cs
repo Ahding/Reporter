@@ -7,7 +7,7 @@ const string path = "D:\\Project\\其他";
 {
     var parameter = _GetDataParameter(true);
 
-    var exporter = new Report<DataModel_01>(parameter).GetExportTool();
+    var exporter = new Report<DataModel>(parameter).GetExportTool();
 
     var (title, mimetype, extension, dataXlsx) = (parameter.SheetName, exporter.GetMimeType(), exporter.GetExtension(), exporter.Export());
 
@@ -28,7 +28,7 @@ const string path = "D:\\Project\\其他";
 /// <summary>
 /// 取得報表參數_01
 /// </summary>
-Report<DataModel_01>.ReportParameterModel _GetDataParameter(bool merge = false)
+Report<DataModel>.ReportParameterModel _GetDataParameter(bool merge = false)
 {
     //取資料
     var source = _GetData();
@@ -40,13 +40,13 @@ Report<DataModel_01>.ReportParameterModel _GetDataParameter(bool merge = false)
     if (merge)
     {
         var sourceGroup = source.GroupBy(x => x.Organization);
-        var dataList = new List<DataModel_01>();
+        var dataList = new List<DataModel>();
 
         //欄合併
         var mergeColumnList = new List<NPOIExportTool.MergeDataColumnModel>();
         foreach (var group in sourceGroup)
         {
-            var sum = new DataModel_01
+            var sum = new DataModel
             {
                 Organization = group.Key,
                 ID = "人數",
@@ -68,13 +68,13 @@ Report<DataModel_01>.ReportParameterModel _GetDataParameter(bool merge = false)
         }
 
         mergeDataColumnCount.Add(
-            nameof(DataModel_01.ID),
+            nameof(DataModel.ID),
             mergeColumnList
         );
 
         //列合併
         mergeRowCountDic.Add(
-            nameof(DataModel_01.Organization), 
+            nameof(DataModel.Organization), 
             dataList.GroupBy(x => x.Organization).Select(x => x.Count()).ToList()
         );
 
@@ -84,7 +84,7 @@ Report<DataModel_01>.ReportParameterModel _GetDataParameter(bool merge = false)
 
     var title = "簡易測試報表";
     var datas = source.Select(x => (IReport)x).ToList();
-    var parameter = new Report<DataModel_01>.ReportParameterModel
+    var parameter = new Report<DataModel>.ReportParameterModel
     {
         Data = datas,
         SheetName = title,
@@ -109,13 +109,13 @@ Report<DataModel_01>.ReportParameterModel _GetDataParameter(bool merge = false)
 /// <summary>
 /// 塞資料
 /// </summary>
-List<DataModel_01> _GetData()
+List<DataModel> _GetData()
 {
-    var datas = new List<DataModel_01>();
+    var datas = new List<DataModel>();
 
     for (int i = 1; i <= 100; i++)
     {
-        datas.Add(new DataModel_01
+        datas.Add(new DataModel
         {
             ID = $"{i}",
             Organization = $"{(i - 1) / 10 + 1}組",

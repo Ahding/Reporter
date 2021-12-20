@@ -10,9 +10,9 @@ using System.Threading.Tasks;
 namespace Reporter.Models
 {
     /// <summary>
-    /// 匯出模型範例01
+    /// 匯出模型範例
     /// </summary>
-    public class DataModel_01 : IReport
+    public class DataModel : IReport
     {
         /// <summary>單位</summary>
         [Description("單位")]
