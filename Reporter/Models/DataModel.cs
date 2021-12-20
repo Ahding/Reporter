@@ -31,5 +31,9 @@ namespace Reporter.Models
         [ColumnWidth(ColumnWidth = 100)]
         [Description("備註")]
         public string Remark { get; set; }
+        /// <summary>備註2</summary>
+        //[ColumnWidth(ColumnWidth = 100)]
+        //[Description("備註2")]
+        //public string Remark2 { get; set; }
     }
 }

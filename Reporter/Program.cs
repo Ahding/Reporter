@@ -26,9 +26,9 @@ const string path = "D:\\Project\\其他";
 }
 
 /// <summary>
-/// 取得報表參數_01
+/// 取得報表參數
 /// </summary>
-Report<DataModel>.ReportParameterModel _GetDataParameter(bool merge = false)
+ReportParameterModel _GetDataParameter(bool merge = false)
 {
     //取資料
     var source = _GetData();
@@ -36,25 +36,27 @@ Report<DataModel>.ReportParameterModel _GetDataParameter(bool merge = false)
     #region 欄位合併
     var mergeDataColumnCount = new Dictionary<string, List<NPOIExportTool.MergeDataColumnModel>>();
     var mergeRowCountDic = new Dictionary<string, List<int>>();
+    var autoMerge = new ReportParameterModel.AutoMergeModel();
 
     if (merge)
     {
-        var sourceGroup = source.GroupBy(x => x.Organization);
+        var orgGroups = source.GroupBy(x => x.Organization);
         var dataList = new List<DataModel>();
 
         //欄合併
         var mergeColumnList = new List<NPOIExportTool.MergeDataColumnModel>();
-        foreach (var group in sourceGroup)
+        foreach (var orgGroup in orgGroups)
         {
             var sum = new DataModel
             {
-                Organization = group.Key,
+                Organization = orgGroup.Key,
                 ID = "人數",
-                Remark = group.Count().ToString() + "人",
+                Remark = orgGroup.Count().ToString() + "人",
             };
-            var result = group.ToList();
-            result.Add(sum);
-            dataList.AddRange(result);
+
+            var orgGroupList = orgGroup.ToList();
+            orgGroupList.Add(sum);
+            dataList.AddRange(orgGroupList);
 
             var mergeColumn = new NPOIExportTool.MergeDataColumnModel
             {
@@ -74,17 +76,20 @@ Report<DataModel>.ReportParameterModel _GetDataParameter(bool merge = false)
 
         //列合併
         mergeRowCountDic.Add(
-            nameof(DataModel.Organization), 
+            nameof(DataModel.Organization),
             dataList.GroupBy(x => x.Organization).Select(x => x.Count()).ToList()
         );
 
-    source = dataList;
+        source = dataList;
+
+        //autoMerge.MergeRowName = new List<string> { nameof(DataModel.Organization) };
+        //autoMerge.MergeColumnName = new List<string> { nameof(DataModel.ID), nameof(DataModel.Remark) };
     }
     #endregion
 
     var title = "簡易測試報表";
     var datas = source.Select(x => (IReport)x).ToList();
-    var parameter = new Report<DataModel>.ReportParameterModel
+    var parameter = new ReportParameterModel
     {
         Data = datas,
         SheetName = title,
@@ -99,15 +104,18 @@ Report<DataModel>.ReportParameterModel _GetDataParameter(bool merge = false)
             "這是自訂表尾",
             "第二行"
         },
+        //手動
         MergeRowCountDic = mergeRowCountDic,
-        MergeDataColumnCount = mergeDataColumnCount
+        MergeDataColumnCount = mergeDataColumnCount,
+        //自動
+        //AutoMerge = autoMerge,
     };
 
     return parameter;
 }
 
 /// <summary>
-/// 塞資料
+/// 產生假資料
 /// </summary>
 List<DataModel> _GetData()
 {
@@ -120,7 +128,8 @@ List<DataModel> _GetData()
             ID = $"{i}",
             Organization = $"{(i - 1) / 10 + 1}組",
             Name = $"第{i}位",
-            Remark = "我的備註很長我的備註很長我的備註很長我的備註很長"
+            Remark = "我的備註很長我的備註很長我的備註很長我的備註很長",
+            //Remark2 = "備註2"
         });
     }
 

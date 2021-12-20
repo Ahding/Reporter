@@ -23,6 +23,7 @@ namespace Reporter.Models
 
         private bool _ShowEmptyIfZero { get; set; }
         private bool _ShowPrintDate { get; set; }
+        private ReportParameterModel.AutoMergeModel _AutoMerge { get; set; }
 
         /// <summary>
         /// 建構子
@@ -36,6 +37,7 @@ namespace Reporter.Models
             _MergeRowCountDic = parameter.MergeRowCountDic ?? new Dictionary<string, List<int>>();
             _MergeDataColumnCount = parameter.MergeDataColumnCount ?? new Dictionary<string, List<MergeDataColumnModel>>();
             _ShowPrintDate = parameter.ShowPrintDate;
+            _AutoMerge = parameter.AutoMerge;
 
             BindAllData();
         }
@@ -64,7 +66,7 @@ namespace Reporter.Models
             var intNumber = new List<string> {
                 typeof(int).ToString(),
             };
-            var properties = (new T()).GetType().GetProperties();
+            var properties = (new T()).GetType().GetProperties().ToList();
             var dataItem = properties.Select(x => new {
                 x.Name,
                 Attrs = x.GetCustomAttributes(typeof(DescriptionAttribute), true),
@@ -92,15 +94,81 @@ namespace Reporter.Models
                         },
                     ColumnWidth = item.ColumnWidth ?? defaultColumnWidth,
                     ShowEmptyIfZero = _ShowEmptyIfZero,
-
-                    MergeDataRowCount = _MergeRowCountDic.ContainsKey(item.ColumnAttributeName) ?
-                    _MergeRowCountDic[item.ColumnAttributeName] ?? new List<int>() :
-                    new List<int>(),
-
-                    MergeDataColumnCount = _MergeDataColumnCount.ContainsKey(item.ColumnAttributeName) ?
-                    _MergeDataColumnCount[item.ColumnAttributeName] ?? new List<MergeDataColumnModel>() :
-                    new List<MergeDataColumnModel>(),
                 };
+
+                #region 合併
+                if (_AutoMerge != null)
+                {
+                    var mergeDataRowCount = new List<int>();
+                    var mergeDataColumnCount = new List<MergeDataColumnModel>();
+                    _AutoMerge.MergeRowName = _AutoMerge.MergeRowName ?? new List<string>();
+                    _AutoMerge.MergeColumnName = _AutoMerge.MergeColumnName ?? new List<string>();
+                    var mergeRowIndex = 1;
+                    IReport preData = null;
+
+                    foreach (var data in DataList)
+                    {
+                        //欄合併
+                        var columnProperty = properties.Where(x => x.Name == item.ColumnAttributeName && _AutoMerge.MergeColumnName.Contains(x.Name)).FirstOrDefault();
+                        if (columnProperty != null)
+                        {
+                            var columnIndex = properties.IndexOf(columnProperty);
+                            var rowIndex = DataList.IndexOf(data);
+                            var nexProperty = properties.ElementAtOrDefault(columnIndex + 1);
+                            var nullColumns = 0;
+                            while (nexProperty != null && nexProperty.GetValue(data) == null)
+                            {
+                                nullColumns += 1;
+                                nexProperty = properties.ElementAtOrDefault(columnIndex + 1 + nullColumns);
+                            }
+                            if (nullColumns != 0)
+                            {
+                                mergeDataColumnCount.Add(new MergeDataColumnModel
+                                {
+                                    ColumnIdx = columnIndex,
+                                    RowIdx = rowIndex + _TitleList.Count + (_ShowPrintDate ? 1 : 0) + 1, // TableHeader 1
+                                    MergeColumnCount = nullColumns,
+                                    MergeCellAlignType = HorizontalAlignment.Center,
+                                    MergeCellPoints = 16
+                                });
+                            }
+                        }
+
+                        //列合併
+                        var rowProperty = properties.Where(x => x.Name == item.ColumnAttributeName && _AutoMerge.MergeRowName.Contains(x.Name)).FirstOrDefault();
+                        if (preData != null && rowProperty != null)
+                        {
+                            if (rowProperty.GetValue(data) != null && rowProperty.GetValue(data).Equals(rowProperty.GetValue(preData)))
+                            {
+                                mergeRowIndex += 1;
+                            }
+                            else
+                            {
+                                mergeDataRowCount.Add(mergeRowIndex);
+                                mergeRowIndex = 1;
+                            }
+                            //最後一筆
+                            if (DataList.IndexOf(data) == DataList.Count - 1)
+                            {
+                                mergeDataRowCount.Add(mergeRowIndex);
+                            }
+                        }
+                        preData = data;
+                    }
+                    bind.MergeDataRowCount = mergeDataRowCount;
+                    bind.MergeDataColumnCount = mergeDataColumnCount;
+                }
+                else
+                {
+                    bind.MergeDataRowCount = _MergeRowCountDic.ContainsKey(item.ColumnAttributeName) ?
+                    _MergeRowCountDic[item.ColumnAttributeName] ?? new List<int>() :
+                    new List<int>();
+
+                    bind.MergeDataColumnCount = _MergeDataColumnCount.ContainsKey(item.ColumnAttributeName) ?
+                    _MergeDataColumnCount[item.ColumnAttributeName] ?? new List<MergeDataColumnModel>() :
+                    new List<MergeDataColumnModel>();
+                }
+                #endregion
 
                 if (item.IsInteger || item.IsPointNumber)
                     bind.ApplyCellAlignmentForColumn = HorizontalAlignment.Right;
@@ -194,30 +262,39 @@ namespace Reporter.Models
             public bool IsPointNumber { get; set; }
             public List<int> MergeRowCount { get; set; }
         }
+    }
+    /// <summary>
+    /// 匯出參數模型
+    /// </summary>
+    public class ReportParameterModel
+    {
+        /// <summary>匯出服務</summary>
+        public NPOIExportTool Exporter { get; set; }
+        /// <summary>分頁名稱</summary>
+        public string SheetName { get; set; }
+        /// <summary>匯出資料</summary>
+        public List<IReport> Data { get; set; }
+        /// <summary>標題清單</summary>
+        public List<string> TitleList { get; set; }
+        /// <summary>顯示列印日期</summary>
+        public bool ShowPrintDate { get; set; }
+        /// <summary>自動合併欄位</summary>
+        public AutoMergeModel AutoMerge { get; set; }
+        /// <summary>表尾清單</summary>
+        public List<string> FooterList { get; set; }
+        public bool ShowEmptyIfZero { get; set; }
+        /// <summary>合併列</summary>
+        public Dictionary<string, List<int>> MergeRowCountDic { get; set; }
+        /// <summary>合併欄</summary>
+        public Dictionary<string, List<MergeDataColumnModel>> MergeDataColumnCount { get; set; }
 
-        /// <summary>
-        /// 匯出參數模型
-        /// </summary>
-        public class ReportParameterModel
+        /// <summary>自動合併模型</summary>
+        public class AutoMergeModel
         {
-            /// <summary>匯出服務</summary>
-            public NPOIExportTool Exporter { get; set; }
-            /// <summary>分頁名稱</summary>
-            public string SheetName { get; set; }
-            /// <summary>匯出資料</summary>
-            public List<IReport> Data { get; set; }
-            /// <summary>標題清單</summary>
-            public List<string> TitleList { get; set; }
-            /// <summary>顯示列印日期</summary>
-            public bool ShowPrintDate { get; set; }
-            /// <summary>表尾清單</summary>
-            public List<string> FooterList { get; set; }
-            public bool ShowEmptyIfZero { get; set; }
-            /// <summary>合併列</summary>
-            public Dictionary<string, List<int>> MergeRowCountDic { get; set; }
-            /// <summary>合併欄</summary>
-            public Dictionary<string, List<MergeDataColumnModel>> MergeDataColumnCount { get; set; }
-
+            /// <summary>合併欄名稱 (起始欄名稱，後續欄值為Null即合併)</summary>
+            public List<string> MergeColumnName { get; set; }
+            /// <summary>合併列名稱 (上下資料一致且非Null即合併)</summary>
+            public List<string> MergeRowName { get; set; }
         }
     }
 }
