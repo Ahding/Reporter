@@ -1,5 +1,4 @@
-﻿using Reporter.Models;
-using Reporter.Tools;
+﻿using System.ComponentModel;
 using System.Diagnostics;
 
 const string path = "D:\\Project\\其他";
@@ -36,7 +35,7 @@ ReportParameterModel _GetDataParameter(bool merge = false)
     #region 欄位合併
     var mergeDataColumnCount = new Dictionary<string, List<NPOIExportTool.MergeDataColumnModel>>();
     var mergeRowCountDic = new Dictionary<string, List<int>>();
-    //var autoMerge = new ReportParameterModel.AutoMergeModel();
+    var autoMerge = new ReportParameterModel.AutoMergeModel();
 
     if (merge)
     {
@@ -83,8 +82,8 @@ ReportParameterModel _GetDataParameter(bool merge = false)
 
         source = dataList;
 
-        //autoMerge.MergeRowName = new List<string> { nameof(DataModel.Organization) };
-        //autoMerge.MergeColumnName = new List<string> { nameof(DataModel.ID)/*, nameof(DataModel.Remark)*/ };
+        autoMerge.MergeRowName = new List<string> { nameof(DataModel.Organization), nameof(DataModel.Remark) };
+        autoMerge.MergeColumnName = new List<string> { nameof(DataModel.ID), nameof(DataModel.Remark) };
     }
     #endregion
 
@@ -111,7 +110,7 @@ ReportParameterModel _GetDataParameter(bool merge = false)
         MergeDataColumnCount = mergeDataColumnCount,
 
         //自動
-        //AutoMerge = autoMerge,
+        AutoMerge = autoMerge,
     };
 
     return parameter;
@@ -137,4 +136,35 @@ List<DataModel> _GetData()
     }
 
     return datas;
+}
+
+/// <summary>
+/// 匯出模型範例
+/// </summary>
+public class DataModel : IReport
+{
+    /// <summary>單位</summary>
+    [ColumnWidth(ColumnWidth = 15)]
+    [Description("單位")]
+    public string Organization { get; set; }
+
+    /// <summary>ID</summary>
+    [ColumnWidth(ColumnWidth = 15)]
+    [Description("ID")]
+    public string ID { get; set; }
+
+
+    /// <summary>姓名</summary>
+    [ColumnWidth(ColumnWidth = 15)]
+    [Description("姓名")]
+    public string Name { get; set; }
+
+    /// <summary>備註</summary>
+    [ColumnWidth(ColumnWidth = 80)]
+    [Description("備註")]
+    public string Remark { get; set; }
+    /// <summary>備註2</summary>
+    //[ColumnWidth(ColumnWidth = 100)]
+    //[Description("備註2")]
+    //public string Remark2 { get; set; }
 }

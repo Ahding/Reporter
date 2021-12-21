@@ -1,12 +1,4 @@
-﻿using NPOI.SS.UserModel;
-using NPOI.XSSF.UserModel;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-using Reporter.Tools;
-
-namespace Reporter.Models
+﻿namespace Reporter.Models
 {
     /// <summary>
     /// 分頁產生器

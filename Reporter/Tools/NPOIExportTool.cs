@@ -1,15 +1,4 @@
-﻿using NPOI.HSSF.UserModel;
-using NPOI.SS.UserModel;
-using NPOI.XSSF.UserModel;
-using NPOI.XSSF.UserModel.Extensions;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Web;
-using Reporter.Tools;
-
-namespace Reporter.Tools
+﻿namespace Reporter.Tools
 {
     #region 工具
     /// <summary>
