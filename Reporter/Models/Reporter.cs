@@ -149,7 +149,7 @@ namespace Reporter.Models
                                 mergeRowIndex = 1;
                             }
                             //最後一筆
-                            if (DataList.IndexOf(data) + 1 == DataList.Count)
+                            if (data.Equals(DataList.Last()))
                             {
                                 mergeDataRowCount.Add(mergeRowIndex);
                                 mergeRowIndex = 1;

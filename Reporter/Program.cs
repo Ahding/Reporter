@@ -84,7 +84,7 @@ ReportParameterModel _GetDataParameter(bool merge = false)
         source = dataList;
 
         //autoMerge.MergeRowName = new List<string> { nameof(DataModel.Organization) };
-        //autoMerge.MergeColumnName = new List<string> { nameof(DataModel.ID), nameof(DataModel.Remark) };
+        //autoMerge.MergeColumnName = new List<string> { nameof(DataModel.ID)/*, nameof(DataModel.Remark)*/ };
     }
     #endregion
 

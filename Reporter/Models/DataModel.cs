@@ -15,20 +15,23 @@ namespace Reporter.Models
     public class DataModel : IReport
     {
         /// <summary>單位</summary>
+        [ColumnWidth(ColumnWidth = 15)]
         [Description("單位")]
         public string Organization { get; set; }
 
         /// <summary>ID</summary>
+        [ColumnWidth(ColumnWidth = 15)]
         [Description("ID")]
         public string ID { get; set; }
 
 
         /// <summary>姓名</summary>
+        [ColumnWidth(ColumnWidth = 15)]
         [Description("姓名")]
         public string Name { get; set; }
 
         /// <summary>備註</summary>
-        [ColumnWidth(ColumnWidth = 100)]
+        [ColumnWidth(ColumnWidth = 80)]
         [Description("備註")]
         public string Remark { get; set; }
         /// <summary>備註2</summary>
