@@ -97,7 +97,8 @@ namespace Reporter.Models
                 };
 
                 #region 合併
-                if (_AutoMerge != null)
+                if (_AutoMerge != null && 
+                    (_AutoMerge.MergeRowName?.Count > 0 || _AutoMerge.MergeColumnName?.Count > 0))
                 {
                     var mergeDataRowCount = new List<int>();
                     var mergeDataColumnCount = new List<MergeDataColumnModel>();
@@ -138,7 +139,7 @@ namespace Reporter.Models
                         var rowProperty = properties.Where(x => x.Name == item.ColumnAttributeName && _AutoMerge.MergeRowName.Contains(x.Name)).FirstOrDefault();
                         if (preData != null && rowProperty != null)
                         {
-                            if (rowProperty.GetValue(data) != null && rowProperty.GetValue(data).Equals(rowProperty.GetValue(preData)))
+                            if (rowProperty.GetValue(data) != null && rowProperty.GetValue(data)?.Equals(rowProperty.GetValue(preData)) == true)
                             {
                                 mergeRowIndex += 1;
                             }
@@ -148,9 +149,10 @@ namespace Reporter.Models
                                 mergeRowIndex = 1;
                             }
                             //最後一筆
-                            if (DataList.IndexOf(data) == DataList.Count - 1)
+                            if (DataList.IndexOf(data) + 1 == DataList.Count)
                             {
                                 mergeDataRowCount.Add(mergeRowIndex);
+                                mergeRowIndex = 1;
                             }
                         }
                         preData = data;

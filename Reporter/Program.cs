@@ -5,14 +5,14 @@ using System.Diagnostics;
 const string path = "D:\\Project\\其他";
 
 {
-    var parameter = _GetDataParameter(true);
+    var parameter = _GetDataParameter();
 
     var exporter = new Report<DataModel>(parameter).GetExportTool();
 
     var (title, mimetype, extension, dataXlsx) = (parameter.SheetName, exporter.GetMimeType(), exporter.GetExtension(), exporter.Export());
 
     //Web
-    //return System.IO.File(dataXlsx, mimetype, $"{title}.{extension}");
+    //return File(dataXlsx, mimetype, $"{title}.{extension}");
 
     //應用程式
     var fileName = $"{path}\\{title}.{extension}";
@@ -104,9 +104,11 @@ ReportParameterModel _GetDataParameter(bool merge = false)
             "這是自訂表尾",
             "第二行"
         },
+
         //手動
         MergeRowCountDic = mergeRowCountDic,
         MergeDataColumnCount = mergeDataColumnCount,
+
         //自動
         //AutoMerge = autoMerge,
     };
