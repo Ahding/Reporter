@@ -36,14 +36,14 @@ ReportParameterModel _GetDataParameter(bool merge = false)
     #region 欄位合併
     var mergeDataColumnCount = new Dictionary<string, List<NPOIExportTool.MergeDataColumnModel>>();
     var mergeRowCountDic = new Dictionary<string, List<int>>();
-    var autoMerge = new ReportParameterModel.AutoMergeModel();
+    //var autoMerge = new ReportParameterModel.AutoMergeModel();
 
     if (merge)
     {
         var orgGroups = source.GroupBy(x => x.Organization);
         var dataList = new List<DataModel>();
 
-        //欄合併
+        //插入合計欄位
         var mergeColumnList = new List<NPOIExportTool.MergeDataColumnModel>();
         foreach (var orgGroup in orgGroups)
         {
@@ -58,6 +58,7 @@ ReportParameterModel _GetDataParameter(bool merge = false)
             orgGroupList.Add(sum);
             dataList.AddRange(orgGroupList);
 
+            //欄合併
             var mergeColumn = new NPOIExportTool.MergeDataColumnModel
             {
                 ColumnIdx = 1,
